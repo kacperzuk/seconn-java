@@ -6,8 +6,12 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
+group = 'pl.kacperzuk.libs'
+version = '1.0'
+
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+archivesBaseName = "seconn"
 
 bintray {
     Properties properties = new Properties()

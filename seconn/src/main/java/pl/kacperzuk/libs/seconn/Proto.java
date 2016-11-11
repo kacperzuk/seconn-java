@@ -1,4 +1,4 @@
-package pl.kacperzuk;
+package pl.kacperzuk.libs.seconn;
 
 import java.util.Arrays;
 

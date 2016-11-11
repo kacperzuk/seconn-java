@@ -1,4 +1,4 @@
-package pl.kacperzuk;
+package pl.kacperzuk.libs.seconn;
 
 /**
  * Created by kaz on 11.11.16.

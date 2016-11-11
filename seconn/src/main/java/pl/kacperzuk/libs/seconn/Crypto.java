@@ -1,4 +1,4 @@
-package pl.kacperzuk;
+package pl.kacperzuk.libs.seconn;
 
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
