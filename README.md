@@ -115,7 +115,7 @@ seConn.writeData("Hello from the other side!".getBytes());
 // trusted!  SeConn only makes sure that data was sent by owner of the
 // key, not that key is trusted!
 
-System.our.print("Public key of the other side is: ");
+System.out.print("Public key of the other side is: ");
 System.out.println(seConn.public_key);
 
 // passing data from network to SeConn
