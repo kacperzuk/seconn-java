@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -26,20 +27,24 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-/**
- * Created by kaz on 09.11.16.
- */
-
-public class Crypto {
+class Crypto {
     private ECPrivateKey ourECPrivKey;
     private ECPublicKey ourECPubKey;
     private byte[] encKey;
     private byte[] macKey;
-    Crypto() {
-        byte[] ourPrivKey = new byte[]{114, -6, 88, -40, 122, -15, 69, -126, -114, -118, -21, -68, 106, -36, -127, 49, -95, -110, -106, 77, 93, -10, -5, 93, 9, 66, -2, 61, -107, 14, -86, 110};
-        byte[] ourPubKey = new byte[]{98, 18, 24, 93, 100, 87, -53, -66, -42, -16, -11, 85, 6, 59, -35, 31, 123, 42, 116, 88, -79, -11, -80, -9, -51, -81, -21, 17, 48, -94, -84, 56, -53, 42, 120, -100, 83, 51, 25, 115, -30, -93, -93, -65, -68, -13, -87, -78, -23, -73, 57, 0, -63, 18, -77, 126, -60, -57, 35, -100, -33, -16, 15, 13};
-        ourECPrivKey = parsePrivateKey(ourPrivKey);
-        ourECPubKey = parsePublicKey(ourPubKey);
+    Crypto(KeyPairBytes keyPairBytes) {
+        if(keyPairBytes == null) {
+            KeyPair kp = generateKeyPair();
+            ourECPrivKey = (ECPrivateKey) kp.getPrivate();
+            ourECPubKey = (ECPublicKey) kp.getPublic();
+        } else {
+            ourECPrivKey = parsePrivateKey(keyPairBytes.private_key);
+            ourECPubKey = parsePublicKey(keyPairBytes.public_key);
+        }
+    }
+
+    public KeyPairBytes getKeyPair() {
+        return new KeyPairBytes(formatPrivateKey(ourECPrivKey), formatPublicKey(ourECPubKey));
     }
 
     public byte[] encryptThenMac(byte[] data) {
@@ -174,7 +179,7 @@ public class Crypto {
         return ret;
     }
 
-    private ECParameterSpec getParameterSpec() {
+    private KeyPair generateKeyPair() {
         ECGenParameterSpec ecParamSpec = new ECGenParameterSpec("secp256r1");
         KeyPairGenerator kpg = null;
         try {
@@ -187,7 +192,11 @@ public class Crypto {
         } catch (InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
-        return ((ECPublicKey)kpg.generateKeyPair().getPublic()).getParams();
+        return kpg.generateKeyPair();
+    }
+
+    private ECParameterSpec getParameterSpec() {
+        return ((ECPublicKey)generateKeyPair().getPublic()).getParams();
     }
 
     private ECPrivateKey parsePrivateKey(byte[] pkey) {

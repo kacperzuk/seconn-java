@@ -1,8 +1,5 @@
 package pl.kacperzuk.libs.seconn;
 
-/**
- * Created by kaz on 11.11.16.
- */
 
 public class ParseResult {
     public enum Result {

@@ -26,7 +26,11 @@ public class SeConn {
     private byte[] public_key;
 
     public SeConn(SeConnHandler _handler) {
-        crypto = new Crypto();
+        this(_handler, null);
+    }
+
+    public SeConn(SeConnHandler _handler, KeyPairBytes keyPairBytes) {
+        crypto = new Crypto(keyPairBytes);
         handler = _handler;
         state = State.NEW;
         buffer = new byte[0];
@@ -34,6 +38,10 @@ public class SeConn {
 
     public void connect() {
         sendHelloRequest();
+    }
+
+    public KeyPairBytes getKeyPair() {
+        return crypto.getKeyPair();
     }
 
     public void writeData(byte[] data) {
