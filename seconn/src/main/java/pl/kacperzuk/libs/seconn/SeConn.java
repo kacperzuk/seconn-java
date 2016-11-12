@@ -36,6 +36,10 @@ public class SeConn {
         buffer = new byte[0];
     }
 
+    public byte[] getOurPublicKey() {
+        return crypto.getPubKey();
+    }
+
     public void connect() {
         sendHelloRequest();
     }

@@ -96,12 +96,26 @@ import pl.kacperzuk.libs.seconn.SeConn;
 HandleConnection handler = new HandleConnection();
 SeConn seConn = new SeConn(handler);
 
+// you can get your public key immediately, for example to show it to user for verificateion
+// do not confuse .getOurPublicKey() with .public_key! see below.
+System.out.print("My public key is: ");
+System.out.println(seConn.getOurPublicKey());
+
 // send HelloRequest when you now that the other side is listening
 seConn.connect()
 
 // after the state is AUTHENTICATED
 // passing data that should be encrypted and sent to other side:
 seConn.writeData("Hello from the other side!".getBytes());
+
+// you can get the public key of the other side
+//
+// IMPORTANT! It's up to you to make sure that the public_key is
+// trusted!  SeConn only makes sure that data was sent by owner of the
+// key, not that key is trusted!
+
+System.our.print("Public key of the other side is: ");
+System.out.println(seConn.public_key);
 
 // passing data from network to SeConn
 InputStream in = ...;
@@ -110,4 +124,15 @@ while(true) {
     int bytes = in.read(buffer);
     seConn.newData(Arrays.copyOfRange(bytes, 0, bytes));
 }
+```
+
+### Making keys persistent
+
+When you call `new SeConn(handler)` it will generate a new key pair. That will be fine if you don't care about authenticating your java application, but if you do you may want to make keys persistent.
+
+Use `KeyPairBytes SeConn.getKeyPair()` to retrieve generated keys. `KeyPairBytes` contains two `byte[]` fields: `private_key` and `public_key`. Just serialize this object and store it somewhere. To use it again next time, do:
+
+```java
+KeyPairBytes keyPair = retrieveKeyPair();
+SeConn seConn = new SeConn(handler, keyPair);
 ```
