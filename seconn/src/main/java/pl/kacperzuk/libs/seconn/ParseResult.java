@@ -1,8 +1,8 @@
 package pl.kacperzuk.libs.seconn;
 
 
-public class ParseResult {
-    public enum Result {
+class ParseResult {
+    enum Result {
         OK,
         TOO_SHORT,
         INVALID_VERSION,
@@ -23,15 +23,15 @@ public class ParseResult {
         bytesConsumed = bytes;
     }
 
-    public Result getResult() {
+    Result getResult() {
         return result;
     }
 
-    public Message getMessage() {
+    Message getMessage() {
         return message;
     }
 
-    public int getBytesConsumed() {
+    int getBytesConsumed() {
         return bytesConsumed;
     }
 }

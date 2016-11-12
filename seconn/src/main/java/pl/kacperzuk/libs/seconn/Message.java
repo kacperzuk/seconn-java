@@ -1,11 +1,8 @@
 package pl.kacperzuk.libs.seconn;
 
-/**
- * Created by kaz on 11.11.16.
- */
 
-public class Message {
-    public enum MessageType {
+class Message {
+    enum MessageType {
         HelloRequest(0x00),
         HelloResponse(0x01),
         EncryptedData(0x02),
@@ -18,10 +15,10 @@ public class Message {
         }
 
         public byte getValue() {
-            return (byte)id;
+            return (byte) id;
         }
     }
 
-    public MessageType type;
-    public byte[] raw_payload;
+    MessageType type;
+    byte[] raw_payload;
 }

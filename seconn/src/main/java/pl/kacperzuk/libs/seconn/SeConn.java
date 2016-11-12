@@ -4,10 +4,6 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
-/**
- * Created by kaz on 11.11.16.
- */
-
 public class SeConn {
     public enum State {
         NEW,
@@ -23,7 +19,7 @@ public class SeConn {
     private State state;
     private byte[] buffer;
 
-    private byte[] public_key;
+    public byte[] public_key;
 
     public SeConn(SeConnHandler _handler) {
         this(_handler, null);
@@ -133,8 +129,31 @@ public class SeConn {
             changeState(State.SYNC_ERROR);
         }
 
-        if(buffer.length > 0) {
+        if (buffer.length > 0) {
             newData(new byte[0]);
         }
+    }
+
+
+    public static String toHex(byte[] array) {
+        String ret = "0x";
+        String alphabet = "0123456789ABCDEF";
+        for (byte b : array) {
+            ret += alphabet.charAt((b & 0xF0) >> 4);
+            ret += alphabet.charAt(b & 0x0F);
+        }
+        return ret;
+    }
+
+    public static String toUint8Array(byte[] array) {
+        String ret = "{ ";
+        for (int i = 0; i < array.length; i++) {
+            ret += String.valueOf(0xFF & array[i]);
+            if (i != array.length - 1) {
+                ret += ", ";
+            }
+        }
+        ret += "}";
+        return ret;
     }
 }

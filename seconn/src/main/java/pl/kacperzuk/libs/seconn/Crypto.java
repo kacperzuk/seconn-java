@@ -32,8 +32,9 @@ class Crypto {
     private ECPublicKey ourECPubKey;
     private byte[] encKey;
     private byte[] macKey;
+
     Crypto(KeyPairBytes keyPairBytes) {
-        if(keyPairBytes == null) {
+        if (keyPairBytes == null) {
             KeyPair kp = generateKeyPair();
             ourECPrivKey = (ECPrivateKey) kp.getPrivate();
             ourECPubKey = (ECPublicKey) kp.getPublic();
@@ -41,50 +42,6 @@ class Crypto {
             ourECPrivKey = parsePrivateKey(keyPairBytes.private_key);
             ourECPubKey = parsePublicKey(keyPairBytes.public_key);
         }
-    }
-
-    public KeyPairBytes getKeyPair() {
-        return new KeyPairBytes(formatPrivateKey(ourECPrivKey), formatPublicKey(ourECPubKey));
-    }
-
-    public byte[] encryptThenMac(byte[] data) {
-        byte[] ciphertext = encryptData(data, encKey);
-        byte[] mac = calculateSignature(ciphertext, macKey);
-
-        byte[] ret = new byte[mac.length+ciphertext.length];
-        System.arraycopy(mac, 0, ret, 0, mac.length);
-        System.arraycopy(ciphertext, 0, ret, mac.length, ciphertext.length);
-        return ret;
-    }
-    private byte[] xor_block(byte[] a, byte[] b) {
-        byte[] ret = new byte[16];
-        for(int i = 0; i < 16; i++) {
-            ret[i] = (byte)(a[i]^b[i]);
-        }
-        return ret;
-    }
-
-    public boolean checkMac(byte[] payload) {
-        byte[] mac = Arrays.copyOfRange(payload, 0, 16);
-        byte[] data = Arrays.copyOfRange(payload, 16, payload.length);
-        return MessageDigest.isEqual(calculateSignature(data, macKey), mac);
-    }
-
-    public byte[] decrypt(byte[] payload) {
-        byte[] encrypted = Arrays.copyOfRange(payload, 16, payload.length);
-        SecretKeySpec skeySpec = new SecretKeySpec(encKey, "AES");
-        Cipher cipher = null;
-        byte[] decrypted = null;
-
-        try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
-            byte[] iv = new byte[16];
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(iv));
-            decrypted = cipher.doFinal(encrypted);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | InvalidKeyException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        }
-        return Arrays.copyOfRange(decrypted, 16, decrypted.length);
     }
 
     private byte[] calculateSignature(byte[] data, byte[] mac_key) {
@@ -103,6 +60,51 @@ class Crypto {
         }
 
         return Arrays.copyOfRange(encrypted, encrypted.length - 16, encrypted.length);
+    }
+
+    boolean checkMac(byte[] payload) {
+        byte[] mac = Arrays.copyOfRange(payload, 0, 16);
+        byte[] data = Arrays.copyOfRange(payload, 16, payload.length);
+        return MessageDigest.isEqual(calculateSignature(data, macKey), mac);
+    }
+
+    KeyPairBytes getKeyPair() {
+        return new KeyPairBytes(formatPrivateKey(ourECPrivKey), formatPublicKey(ourECPubKey));
+    }
+
+    byte[] encryptThenMac(byte[] data) {
+        byte[] ciphertext = encryptData(data, encKey);
+        byte[] mac = calculateSignature(ciphertext, macKey);
+
+        byte[] ret = new byte[mac.length + ciphertext.length];
+        System.arraycopy(mac, 0, ret, 0, mac.length);
+        System.arraycopy(ciphertext, 0, ret, mac.length, ciphertext.length);
+        return ret;
+    }
+
+    private byte[] xor_block(byte[] a, byte[] b) {
+        byte[] ret = new byte[16];
+        for (int i = 0; i < 16; i++) {
+            ret[i] = (byte) (a[i] ^ b[i]);
+        }
+        return ret;
+    }
+
+    byte[] decrypt(byte[] payload) {
+        byte[] encrypted = Arrays.copyOfRange(payload, 16, payload.length);
+        SecretKeySpec skeySpec = new SecretKeySpec(encKey, "AES");
+        Cipher cipher = null;
+        byte[] decrypted = null;
+
+        try {
+            cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
+            byte[] iv = new byte[16];
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec, new IvParameterSpec(iv));
+            decrypted = cipher.doFinal(encrypted);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | InvalidKeyException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
+        return Arrays.copyOfRange(decrypted, 16, decrypted.length);
     }
 
     private byte[] encryptData(byte[] data, byte[] enc_key) {
@@ -140,11 +142,11 @@ class Crypto {
         return encrypted;
     }
 
-    public byte[] extractMACKey(byte[] secret) {
+    private byte[] extractMACKey(byte[] secret) {
         return Arrays.copyOfRange(secret, 16, 32);
     }
 
-    public byte[] extractEncKey(byte[] secret) {
+    private byte[] extractEncKey(byte[] secret) {
         return Arrays.copyOfRange(secret, 0, 16);
     }
 
@@ -196,7 +198,7 @@ class Crypto {
     }
 
     private ECParameterSpec getParameterSpec() {
-        return ((ECPublicKey)generateKeyPair().getPublic()).getParams();
+        return ((ECPublicKey) generateKeyPair().getPublic()).getParams();
     }
 
     private ECPrivateKey parsePrivateKey(byte[] pkey) {
@@ -275,29 +277,7 @@ class Crypto {
         }
     }
 
-    public static String toHex(byte[] array) {
-        String ret = "0x";
-        String alphabet = "0123456789ABCDEF";
-        for (byte b : array) {
-            ret += alphabet.charAt((b & 0xF0) >> 4);
-            ret += alphabet.charAt(b & 0x0F);
-        }
-        return ret;
-    }
-
-    public static String toUint8Array(byte[] array) {
-        String ret = "{ ";
-        for (int i = 0; i < array.length; i++) {
-            ret += String.valueOf(0xFF & array[i]);
-            if (i != array.length - 1) {
-                ret += ", ";
-            }
-        }
-        ret += "}";
-        return ret;
-    }
-
-    public byte[] getPubKey() {
+    byte[] getPubKey() {
         return formatPublicKey(ourECPubKey);
     }
 }
